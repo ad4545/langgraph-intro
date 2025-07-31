@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from typing import Annotated, List, Generator
-from langchain_openai import ChatOpenAI
+# from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessageChunk
 from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-from langgraph.checkpoint.memory import MemorySaver
+# from langgraph.checkpoint.memory import MemorySaver
 from scout.tools import query_db, generate_visualization
 from scout.prompts import prompts
 
@@ -30,7 +31,7 @@ class Agent:
             self, 
             name: str, 
             tools: List = [query_db, generate_visualization],
-            model: str = "gpt-4.1-mini-2025-04-14", 
+            model: str = "claude-3-5-sonnet-20240620", 
             system_prompt: str = "You are a helpful assistant.",
             temperature: float = 0.1
             ):
@@ -40,7 +41,7 @@ class Agent:
         self.system_prompt = system_prompt
         self.temperature = temperature
         
-        self.llm = ChatOpenAI(
+        self.llm = ChatAnthropic(
             model=self.model,
             temperature=self.temperature
             ).bind_tools(self.tools)
@@ -76,7 +77,7 @@ class Agent:
         builder.add_conditional_edges("chatbot", router, ["tools", END])
         builder.add_edge("tools", "chatbot")
 
-        return builder.compile(checkpointer=MemorySaver())
+        return builder.compile()
     
 
     def inspect_graph(self):
