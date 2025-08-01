@@ -62,18 +62,19 @@ def process_line(line: str, current_event: str) -> str:
                         finish_reason = message_chunk["response_metadata"].get("finish_reason", "")
                         if finish_reason == "tool_calls":
                             return "\n\n"
-                        
+                    
                     if message_chunk["tool_call_chunks"]:
                         tool_chunk = message_chunk["tool_call_chunks"][0]
 
                         tool_name = tool_chunk.get("name", "")
                         args = tool_chunk.get("args", "")
                         
+                        tool_call_str = ""  # Initialize the variable
                         if tool_name:
-                            tool_call_str = f"\n\n< TOOL CALL: {tool_name} >\n\n"
+                            tool_call_str += f"\n\n< TOOL CALL: {tool_name} >\n\n"
 
                         if args:
-                            tool_call_str = args
+                            tool_call_str += args
                         return tool_call_str
                     else:
                         return message_chunk["content"]
@@ -87,6 +88,41 @@ def process_line(line: str, current_event: str) -> str:
         print(f"Error processing line: {type(e).__name__}: {str(e)}")
         raise
 
+# def process_line(line: str, current_event: str) -> str:
+#     try:
+#         if line.startswith("data: "):
+#             data_content = line[6:]
+#             data = json.loads(data_content)
+
+#             # If it's a list or tuple with 2 elements
+#             if isinstance(data, (list, tuple)) and len(data) == 2:
+#                 message_chunk, metadata = data
+#             else:
+#                 message_chunk = data  # fallback
+
+#             if current_event == "messages":
+#                 if isinstance(message_chunk, dict) and message_chunk.get("type") == "AIMessageChunk":
+#                     if message_chunk.get("response_metadata", {}).get("finish_reason") == "tool_calls":
+#                         return "\n\n"
+
+#                     if message_chunk.get("tool_call_chunks"):
+#                         tool_chunk = message_chunk["tool_call_chunks"][0]
+#                         tool_name = tool_chunk.get("name", "")
+#                         args = tool_chunk.get("args", "")
+#                         tool_call_str = ""
+#                         if tool_name:
+#                             tool_call_str += f"\n\n< TOOL CALL: {tool_name} >\n\n"
+#                         if args:
+#                             tool_call_str += args
+#                         return tool_call_str or ""
+#                     else:
+#                         return message_chunk.get("content", "")
+#         return ""
+#     except Exception as e:
+#         print(f"Error processing line: {type(e).__name__}: {str(e)}")
+#         raise
+
+
 
 async def get_stream(thread_id: str, message: str):
     """Send a message to the thread and process the streaming response.
@@ -99,7 +135,7 @@ async def get_stream(thread_id: str, message: str):
     Returns:
         str: The complete response from the assistant
     """
-    full_content = ""
+    full_content = []
     current_event = None
 
     try:

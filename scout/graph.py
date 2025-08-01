@@ -6,7 +6,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AI
 from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-# from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.memory import MemorySaver
 from scout.tools import query_db, generate_visualization
 from scout.prompts import prompts
 
@@ -77,7 +77,7 @@ class Agent:
         builder.add_conditional_edges("chatbot", router, ["tools", END])
         builder.add_edge("tools", "chatbot")
 
-        return builder.compile()
+        return builder.compile(checkpointer=MemorySaver())
     
 
     def inspect_graph(self):

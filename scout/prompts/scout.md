@@ -11,27 +11,15 @@ You have access to the following tools:
 
 ## DB SCHEMA
 
-The database has the following tables on the schema `onlyvans`. You should only access the tables on this schema.
+The database has the following tables on the schema `ECOM_SCHEMA`. You should only access the tables on this schema.
 
-[creators]
-id: int8 (Primary key)
-first_name: text
-last_name: text
-email: text
-join_date: timestamptz
-last_post_date: timestamptz
+[sales]
+customer_id: text (Primary key)
+sales_id: text
+seller_id: text
+product_category: text
+date: timestamptz
+revenue: float8
+city text
+state text
 
-[customers]
-id: int8 (Primary key)
-first_name: text
-last_name: text
-email: text
-join_date: timestamptz
-
-[transactions]
-id: int8 (Primary key)
-customer_id: int8 (Foreign key to customers.id)
-creator_id: int8 (Foreign key to creators.id)
-transaction_date: timestamptz
-amount_usd: float8
-transaction_type: text
